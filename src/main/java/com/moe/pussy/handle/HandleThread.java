@@ -26,7 +26,14 @@ public class HandleThread implements Runnable,RequestHandler.Callback
 		this.pool = new WeakReference<ThreadPoolExecutor>(pool);
 		pool.execute(this);
 	}
-
+	private void success(){
+		success = true;
+		for (final Callback call:calls)
+		{
+			call.onResponse(response);
+		}
+		calls.clear();
+	}
 	public void cancel()
 	{
 		request.cancel(true);
@@ -49,6 +56,8 @@ public class HandleThread implements Runnable,RequestHandler.Callback
 		RequestHandler h=request.getPussy().getDispatcher().getHandler(request);
 		if (h != null)
 			h.onHandle(pool.get(), request, this);
+			else
+			success();
 
 	}
 
@@ -56,12 +65,7 @@ public class HandleThread implements Runnable,RequestHandler.Callback
 	public void onSuccess(final RequestHandler.Response response)
 	{
 		this.response = response;
-		success = true;
-		for (final Callback call:calls)
-		{
-			call.onResponse(response);
-		}
-		calls.clear();
+		success();
 	}
 
 	@Override
@@ -76,19 +80,26 @@ public class HandleThread implements Runnable,RequestHandler.Callback
 			catch (Exception ee)
 			{}
 			else{
-				success=true;
-				for (final Callback call:calls)
-				{
-					call.onResponse(response);
-				}
-				calls.clear();
+				success();
 			}
 	}
 
+	@Override
+	public void onProgress(long current, long length)
+	{
+		for (final Callback call:calls)
+		{
+			call.onProgress(current,length);
+		}
+	}
+
+	
 
 
 	public interface Callback
 	{
 		void onResponse(RequestHandler.Response response);
+		void onStart();
+		void onProgress(long current,long length);
 	}
 }

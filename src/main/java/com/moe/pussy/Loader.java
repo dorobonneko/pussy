@@ -34,6 +34,28 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 		//pussy = request.getPussy();
 	}
 
+	@Override
+	public void onStart()
+	{
+		Pussy.post(new Runnable(){
+			public void run(){
+		if(getRequest().getListener()!=null){
+			getRequest().getListener().onStart(getRequest());
+		}
+		}});
+	}
+
+	@Override
+	public void onProgress(final long current, final long length)
+	{
+		Pussy.post(new Runnable(){
+				public void run(){
+		if(getRequest().getListener()!=null){
+			getRequest().getListener().onProgress(current,length,getRequest());
+		}
+		}});
+	}
+
 	public void pause()
 	{
 		pause.set(true);
@@ -259,6 +281,13 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 
 	private void success(final Resource res, final Throwable e)
 	{
+		Pussy.post(new Runnable(){
+				public void run(){
+					
+		if(getRequest().getListener()!=null){
+			getRequest().getListener().onEnd(getRequest(),e);
+		}
+		}});
 		//Pussy.checkThread(false);
 		if (isCancel())
 		{

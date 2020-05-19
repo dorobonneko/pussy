@@ -11,6 +11,7 @@ public class Request
 	private String url,key,location;
 	private Map<String,String> header=new HashMap<>();
 	private String body;
+	private NetListener l;
 	private AtomicBoolean cancel=new AtomicBoolean();
 	public Request(Pussy p,String url){
 		this.p=new WeakReference<>( p);
@@ -33,7 +34,13 @@ public class Request
 	{
 		this.location=location;
 	}
-
+	public Request listener(NetListener l){
+		this.l=l;
+		return this;
+	}
+	NetListener getListener(){
+		return l;
+	}
 	public Request header(String... header){
 		for(int i=0;i<header.length;i+=2){
 			this.header.put(header[i],header[i+1]);

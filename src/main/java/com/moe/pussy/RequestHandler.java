@@ -17,5 +17,6 @@ public interface RequestHandler
 	public interface Callback{
 		void onSuccess(Response response);
 		void onError(Throwable e);
+		void onProgress(long current,long length);
 	}
 }

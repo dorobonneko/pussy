@@ -45,7 +45,7 @@ public class HttpRequestHandler implements RequestHandler
 		try
 					{
 						//synchronized(Uid.getLock(request.getKey())){
-						Response res=onHandle(request);
+						Response res=onHandle(request,call);
 						if (res == null)
 							throw new NullPointerException();
 						call.onSuccess(res);
@@ -58,7 +58,7 @@ public class HttpRequestHandler implements RequestHandler
 
 					{}
 	}
-	private Response onHandle(Request request) throws IOException
+	private Response onHandle(Request request,Callback call) throws IOException
 	{
 		HttpResponse hrs=new HttpResponse();
 		HttpURLConnection huc=null;
@@ -104,7 +104,7 @@ public class HttpRequestHandler implements RequestHandler
 				tmp.delete();
 				//tmp.renameTo(dc.getCache(request.getKey(), true));
 				//hrs.set(dc.getCache(request.getKey()));
-				return onHandle(request);
+				return onHandle(request,call);
 			}
 			if (code == 301 || code == 302)
 			{
@@ -112,7 +112,7 @@ public class HttpRequestHandler implements RequestHandler
 				if (location != null)
 				{
 					request.setLocation(location);
-					return onHandle(request);
+					return onHandle(request,call);
 				}
 			}
 			input = huc.getInputStream();
@@ -123,12 +123,16 @@ public class HttpRequestHandler implements RequestHandler
 				output = new FileOutputStream(tmp, true);
 			}
 			int len=-1;
+			long current=tmp.length();
+			call.onProgress(current,length);
 			if ("chunked".equalsIgnoreCase(huc.getHeaderField("Transfer-Encoding")))
 			{
 				chunked = true;
 				while ((len = input.read()) != -1)
 				{
 					output.write(len);
+					current+=len;
+					call.onProgress(current,length);
 					if (request.isCancel())
 						throw new CancellationException();
 					//output.flush();
@@ -141,6 +145,8 @@ public class HttpRequestHandler implements RequestHandler
 				while ((len = input.read(buff)) != -1)
 				{
 					output.write(buff, 0, len);
+					current+=len;
+					call.onProgress(current,length);
 					if (request.isCancel())
 						throw new CancellationException();
 					//output.flush();
