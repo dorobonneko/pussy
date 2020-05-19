@@ -51,7 +51,7 @@ public class ImageViewTarget extends ViewTarget
 		if(getView()!=null)
 		((ImageView)getView()).setImageDrawable(d);
 		Listener l=getListener();
-		if(l!=null)l.onError(this,d);
+		if(l!=null)l.onError(this,d,e);
 		
 	}
 

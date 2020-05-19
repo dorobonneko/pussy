@@ -5,5 +5,5 @@ public interface Listener
 {
 	void onPlaceHolder(Target t,Drawable d);
 	void onSuccess(Target t,Drawable d);
-	void onError(Target t,Drawable d);
+	void onError(Target t,Drawable d,Throwable e);
 }

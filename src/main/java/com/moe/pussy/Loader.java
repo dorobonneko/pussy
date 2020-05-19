@@ -131,7 +131,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 
 		}
 	}
-	private void loadFromCache()
+	void loadFromCache()
 	{
 		try
 		{
@@ -156,7 +156,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 				{
 					//原始缓存
 					if (isCancel())return;
-						getTarget().onResourceReady(disk_file.getAbsolutePath());
+						getTarget().onResourceReady(Uri.fromFile(disk_file).toString(),getRequest());
 					//getPussy().fileThreadPool.execute(new BitmapLoader(getPussy().getBitmapPool(),getPussy().decoder, getRequest().getKey(), cache_file, this));
 				}
 				else
@@ -256,7 +256,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 				getTarget().onResourceReady(null);
 			}*/
 			resource=response.getBitmap();
-			getTarget().onResourceReady(response.getBitmap());
+			getTarget().onResourceReady(response.getBitmap(),getRequest());
 		}
 		else if (response.get() == null)
 		{
@@ -270,7 +270,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 			//加入缓存
 			if (!isCancel())
 			{
-				getTarget().onResourceReady(input.getAbsolutePath());
+				getTarget().onResourceReady(Uri.fromFile(input).toString(),getRequest());
 			}
 		}
 	}

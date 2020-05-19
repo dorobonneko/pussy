@@ -13,6 +13,7 @@ import com.moe.pussy.DrawableAnimator;
 import com.moe.pussy.Listener;
 import java.io.File;
 import android.graphics.drawable.Drawable.Callback;
+import com.moe.pussy.Request;
 
 public class DrawableTarget extends LevelListDrawable implements Target
 {
@@ -81,7 +82,7 @@ public class DrawableTarget extends LevelListDrawable implements Target
 		return content;
 	}
 	@Override
-	public void onResourceReady(String cache)
+	public void onResourceReady(String cache,Request request)
 	{
 		Rect bounds= getBounds();
 		//if (getCallback()!=null|| bounds.width() > 0 || bounds.height() > 0)
@@ -124,7 +125,7 @@ public class DrawableTarget extends LevelListDrawable implements Target
 		addLevel(3, 3, d);
 		setLevel(3);
 		Listener l=getListener();
-		if(l!=null)l.onError(this,d);
+		if(l!=null)l.onError(this,d,e);
 		
 	}
 

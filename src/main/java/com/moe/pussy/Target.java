@@ -10,7 +10,7 @@ public interface Target extends SizeReady
 	public abstract void placeHolder(Drawable placeHolder);
 	public ContentBuilder getContent();
 	//原始资源准备完毕，等待回调onSizeReady
-	public abstract void onResourceReady(String cache);
+	public abstract void onResourceReady(String cache,Request request);
 	public abstract void onSuccess(PussyDrawable pd);
 	public abstract void error(Throwable e,Drawable d);
 	public abstract void onCancel();

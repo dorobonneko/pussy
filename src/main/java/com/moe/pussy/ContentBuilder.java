@@ -13,6 +13,8 @@ import com.moe.pussy.handle.HandleThread;
 import com.moe.pussy.target.ViewBackgroundTarget;
 import android.view.View;
 import com.moe.pussy.target.DrawableTarget;
+import java.io.File;
+import com.moe.pussy.target.DownloadTarget;
 
 public class ContentBuilder implements SizeReady
 {
@@ -31,6 +33,25 @@ public class ContentBuilder implements SizeReady
 	private boolean asBitmap;
 	public ContentBuilder(Request r){
 		this.request=r;
+	}
+	public void download(File output){
+		DownloadTarget t=new DownloadTarget(output);
+		target=t;
+		t.onAttachContent(this);
+		t.placeHolder(placeHolder);
+		loader=new Loader(this);
+		if(delay>0)
+			Pussy.post(new Runnable(){
+
+					@Override
+					public void run()
+					{
+						loader.loadFromCache();
+					}
+				}, delay);
+		else
+			loader.loadFromCache();
+		
 	}
 	public ContentBuilder delay(long delay){
 		this.delay=delay;

@@ -12,6 +12,7 @@ import com.moe.pussy.Listener;
 import android.graphics.Rect;
 import java.io.File;
 import java.lang.ref.SoftReference;
+import com.moe.pussy.Request;
 
 public abstract class ViewTarget  implements Target,View.OnAttachStateChangeListener
 {
@@ -61,7 +62,7 @@ public abstract class ViewTarget  implements Target,View.OnAttachStateChangeList
 		return view.get();
 	}
 	@Override
-	public final void onResourceReady(String cache)
+	public final void onResourceReady(String cache,Request req)
 	{
 		if(getView()!=null){
 		if (getView().getMeasuredWidth()==0&&getView().getMeasuredHeight()==0)

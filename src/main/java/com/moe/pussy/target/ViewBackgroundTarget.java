@@ -42,7 +42,7 @@ public class ViewBackgroundTarget extends ViewTarget
 		if(getView()!=null)
 		getView().setBackground(d);
 		Listener l=getListener();
-		if(l!=null)l.onError(this,d);
+		if(l!=null)l.onError(this,d,e);
 		
 	}
 
