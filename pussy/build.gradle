@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.0"
+
+    defaultConfig {
+        applicationId "com.moe.pussy"
+        minSdkVersion 14
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+publish {
+    userOrg = 'dorobonneko'      //bintray注册的用户名
+    groupId = 'com.moe'         //compile引用时的第1部分groupId
+    artifactId = 'pussy'     //compile引用时的第2部分项目名
+    publishVersion = '1.0'    //compile引用时的第3部分版本号
+    desc = 'pussy image framework'
+    website = 'https://github.com/dorobonneko/Pussy'
+}

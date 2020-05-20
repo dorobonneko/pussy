@@ -1,32 +1,38 @@
-apply plugin: 'com.android.library'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.0"
-
-    defaultConfig {
-        applicationId "com.moe.pussy"
-        minSdkVersion 14
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.novoda:bintray-release:0.3.4'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
         }
     }
 }
 
-dependencies {
-	compile fileTree(dir: 'libs', include: ['*.jar'])
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
-publish {
-    userOrg = 'dorobonneko'      //bintray注册的用户名
-    groupId = 'com.moe'         //compile引用时的第1部分groupId
-    artifactId = 'pussy'     //compile引用时的第2部分项目名
-    publishVersion = '1.0'    //compile引用时的第3部分版本号
-    desc = 'pussy image framework'
-    website = 'https://github.com/dorobonneko/Pussy'
+
+ext {
+    compileSdkVersion = 23
+    buildToolsVersion = '25.0.0'
+    minSdkVersion = 14
+    targetSdkVersion = 23
 }
