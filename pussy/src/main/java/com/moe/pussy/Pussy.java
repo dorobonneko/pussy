@@ -246,9 +246,10 @@ public class Pussy
 		if (content != null)
 		{
 			content.cancel();
-			if (request != null&&request.getKey()!=null && !request.getKey().equals(content.getRequest().getKey()))
-			{
-				HandleThread ht=request_handler.remove(content.getRequest().getKey());
+			String request_key=content.getRequest().getKey();
+			String old_request_key=request!=null?request.getKey():null;
+			if (request_key!=null&&!request_key.equals(old_request_key)){
+				HandleThread ht=request_handler.remove(request_key);
 				if (ht != null)
 					ht.cancel();
 			}

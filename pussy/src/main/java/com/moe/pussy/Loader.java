@@ -86,7 +86,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 	}
 	boolean isCancel()
 	{
-		return content.get() == null || content.get().getTarget() == null || getPussy()==null ||getPussy().mThreadPoolExecutor.isShutdown();
+		return requestKey==null||key==null||content.get() == null || content.get().getTarget() == null || getPussy()==null ||getPussy().mThreadPoolExecutor.isShutdown();
 	}
 	Pussy getPussy()
 	{

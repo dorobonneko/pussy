@@ -10,8 +10,9 @@ public class FileRequestHandler implements RequestHandler
 	@Override
 	public boolean canHandle(Request request)
 	{
-		Uri uri=Uri.parse(request.getUrl());
-		switch(uri.getScheme()){
+		String scheme=Uri.parse(request.getUrl()).getScheme();
+		if(scheme!=null)
+		switch(scheme){
 			case "file":
 				return true;
 		}

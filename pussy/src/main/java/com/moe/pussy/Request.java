@@ -4,6 +4,7 @@ import java.util.HashMap;
 import android.net.Uri;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
+import android.text.TextUtils;
 
 public class Request
 {
@@ -15,7 +16,7 @@ public class Request
 	private AtomicBoolean cancel=new AtomicBoolean();
 	public Request(Pussy p,String url){
 		this.p=new WeakReference<>( p);
-		this.url=url.startsWith("/")?"file://"+url:url;
+		this.url=TextUtils.isEmpty(url)?null:url.startsWith("/")?"file://"+url:url;
 		userAgent(p.userAgent);
 	}
 	public Request(Pussy p,int res){

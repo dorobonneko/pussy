@@ -30,7 +30,9 @@ public class HttpRequestHandler implements RequestHandler
 	@Override
 	public boolean canHandle(Request request)
 	{
-		switch (Uri.parse(request.getUrl()).getScheme())
+		String scheme=Uri.parse(request.getUrl()).getScheme();
+		if(scheme!=null)
+		switch (scheme)
 		{
 			case "http":
 			case "https":
