@@ -48,6 +48,11 @@ public class Request
 		}
 		return this;
 	}
+	public Request header(Map<String,String> header){
+		if(header!=null)
+		this.header.putAll(header);
+		return this;
+	}
 	public String getKey(){
 		if(key==null)
 			key=Uid.fromString(url);

@@ -44,13 +44,17 @@ public class Image
 	{
 		if (mBitmap != null)
 			return mBitmap.getWidth();
+			if(mMovie!=null)
 		return mMovie.width();
+		return 0;
 	}
 	public int getHeight()
 	{
 		if (mBitmap != null)
 			return mBitmap.getHeight();
+			if(mMovie!=null)
 		return mMovie.height();
+		return 0;
 	}
 	public Bitmap source()
 	{

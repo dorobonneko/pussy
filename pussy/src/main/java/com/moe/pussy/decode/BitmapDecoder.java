@@ -11,6 +11,8 @@ import android.net.Uri;
 import com.moe.pussy.Image;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import android.graphics.drawable.Drawable;
+import android.graphics.Canvas;
 
 public class BitmapDecoder implements Decoder
 {
@@ -75,9 +77,23 @@ public class BitmapDecoder implements Decoder
 					options.inPreferredConfig = Bitmap.Config.RGB_565;
 					options.inJustDecodeBounds = true;
 					BitmapFactory.decodeResource(context.getResources(), id, options);
+					if(options.outWidth<=0||options.outHeight<=0){
+						Drawable d=context.getResources().getDrawable(id,context.getTheme());
+						if(d==null)return null;
+						if(w==0||h==0)
+						{
+							w=d.getIntrinsicWidth();h=d.getIntrinsicHeight();
+						}
+						Bitmap b=mBitmapPool.getBitmap(w,h,Bitmap.Config.ARGB_8888);
+						Canvas canvas=new Canvas(b);
+						d.setBounds(0,0,w,h);
+						d.draw(canvas);
+						return new Image(mBitmapPool,b);
+					}
 					options.inJustDecodeBounds = false;
 					options.inBitmap=mBitmapPool.getBitmap(options.outWidth,options.outHeight,options.inPreferredConfig);
 					options.inMutable = true;
+					options.inPreferredConfig=options.outConfig;
 					options.inSampleSize=calculateInSampleSize(options,w,h);
 					return new Image(mBitmapPool,BitmapFactory.decodeResource(context.getResources(), id, options));
 

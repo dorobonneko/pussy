@@ -146,6 +146,7 @@ public class ContentBuilder implements SizeReady
 		Pussy.checkThread(true);
 		if(loader.isCancel()){
 		target=t;
+		t.placeHolder(placeHolder);
 		loader.begin();
 		}else if(!loader.resume())
 		{

@@ -142,7 +142,7 @@ public class HttpRequestHandler implements RequestHandler
 			}
 			else
 			{
-				byte[] buff=new byte[1024 * 12];
+				byte[] buff=new byte[1024 * 32];
 				
 				while ((len = input.read(buff)) != -1)
 				{

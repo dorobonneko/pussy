@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Stack;
 import com.moe.pussy.decode.BitmapDecoder;
+import java.util.stream.Stream;
 
 public class Pussy
 {
@@ -78,7 +79,7 @@ public class Pussy
 		};
 		//fileThreadPool = new ThreadPoolExecutor(64, 128, 1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), tf);//先进后出
 		//netThreadPool = new ThreadPoolExecutor(128, 512, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), tf);//先进后出
-		mThreadPoolExecutor = new ThreadPoolExecutor(8, 16, 3, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(){
+		mThreadPoolExecutor = new ThreadPoolExecutor(16, 32, 3, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(){
 			public Runnable take()
 				{
 					try
@@ -98,7 +99,7 @@ public class Pussy
 	private void init(Context context)
 	{
 		if(decoder==null)
-			decoder=new BitmapDecoder(context.getApplicationContext());
+			decoder=new BitmapDecoder(context);
 		this.mContext = new WeakReference<Context>(context);
 		mDispatcher = Dispatcher.getDefault(context.getApplicationContext());
 		mDiskCache = DiskCache.get(this);

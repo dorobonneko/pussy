@@ -34,8 +34,8 @@ public class DrawableTarget extends LevelListDrawable implements Target
 	@Override
 	public void onCancel()
 	{
-		setLevel(0);
-		level = 0;
+		//setLevel(0);
+		//level = 0;
 	}
 
 

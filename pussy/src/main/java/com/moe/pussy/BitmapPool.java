@@ -34,7 +34,8 @@ public class BitmapPool extends LinkedHashMap<Integer,Stack<Bitmap>>
 		lock.lock();
 		try
 		{
-
+			if(w<=0||h<=0)
+				return null;
 			int size=getBitmapByteSize(w, h, config);
 			Stack<Bitmap> list=remove(size);
 			if (list != null && !list.isEmpty())

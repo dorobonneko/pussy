@@ -29,7 +29,10 @@ public class MemoryCache extends LruCache<String,Image>
 	@Override
 	protected int sizeOf(String key, Image value)
 	{
-		return value.source().getByteCount();
+		Bitmap b=value.source();
+		if(b!=null)
+			return b.getByteCount();
+			return 0;
 	}
 
 

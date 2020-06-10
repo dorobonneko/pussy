@@ -39,5 +39,8 @@ public class PercentImageView extends ImageView
 			setMeasuredDimension(getMeasuredWidth(),(int)(getMeasuredWidth()*percent));
 		}
 	}
-	
+	public void setPercent(float percent){
+		this.percent=percent;
+		requestLayout();
+	}
 }
