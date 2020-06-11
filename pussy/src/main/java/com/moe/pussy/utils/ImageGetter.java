@@ -10,6 +10,10 @@ import com.moe.pussy.Target;
 import com.moe.pussy.transformer.CropTransformer;
 import java.util.Map;
 import java.util.HashMap;
+import android.os.SystemClock;
+import android.widget.TextView.BufferType;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.Paint;
 
 public class ImageGetter implements Html.ImageGetter,Drawable.Callback
 {
@@ -18,85 +22,110 @@ public class ImageGetter implements Html.ImageGetter,Drawable.Callback
 	private Map<String,String> header;
 	private String host;
 	private Map<String,Drawable> cache=new HashMap<>();
-	public ImageGetter(TextView tv){
-		this(tv,0);
+	public ImageGetter(TextView tv)
+	{
+		this(tv, 0);
 	}
-	public ImageGetter(TextView tv,String host){
-		this(tv,0,host,null);
+	public ImageGetter(TextView tv, String host)
+	{
+		this(tv, 0, host, null);
 	}
-	public ImageGetter(TextView tv,int width){
-		this(tv,width,null,null);
+	public ImageGetter(TextView tv, int width)
+	{
+		this(tv, width, null, null);
 	}
-	public ImageGetter(TextView tv,int width,String host,Map<String,String> header){
-		this.tv=tv;
-		this.width=width;
-		this.header=header;
-		this.host=host;
+	public ImageGetter(TextView tv, int width, String host, Map<String,String> header)
+	{
+		this.tv = tv;
+		this.width = width;
+		this.header = header;
+		this.host = host;
 	}
 	@Override
 	public android.graphics.drawable.Drawable getDrawable(String p1)
 	{
-		if(!p1.startsWith("http"))
-			p1=host+p1;
-			Drawable d=cache.get(p1);
-			if(d==null){
-		final Drawable place=Pussy.$(tv.getContext()).load(p1).header(header).execute().transformer(new CropTransformer(Gravity.CENTER_HORIZONTAL)).listener(new Listener(){
+		if (!p1.startsWith("http"))
+			p1 = host + p1;
+		Drawable d=cache.get(p1);
+		if (d == null)
+		{
+			final Drawable place=Pussy.$(tv.getContext()).load(p1).header(header).execute().transformer(new CropTransformer(Gravity.CENTER_HORIZONTAL)).listener(new Listener(){
 
-				@Override
-				public void onPlaceHolder(Target t,Drawable d)
-				{
-				}
+					@Override
+					public void onPlaceHolder(Target t, Drawable d)
+					{
+					}
 
-				@Override
-				public void onSuccess(final Target t,final Drawable d)
-				{
-					tv.post(new Runnable(){
+					@Override
+					public void onSuccess(final Target t, final Drawable d)
+					{
+						tv.post(new Runnable(){
 
-							@Override
-							public void run()
-							{
-								int width=ImageGetter.this.width==0?(tv.getWidth()-tv.getPaddingStart()-tv.getPaddingEnd()):(ImageGetter.this.width-tv.getPaddingStart()-tv.getPaddingEnd());
-								if(d.getIntrinsicWidth()>width)
-									((Drawable)t).setBounds(0,0,width,(int)(width/(float)d.getIntrinsicWidth()* d.getIntrinsicHeight()));
-								else /*if(d.getIntrinsicHeight()<tv.getLayout().getHeight()/tv.getLayout().getLineCount()){
-									int height=tv.getLayout().getHeight()/tv.getLayout().getLineCount()/2;
-									((Drawable)t).setBounds(0,0,(int)(height/(float)d.getIntrinsicHeight()*d.getIntrinsicWidth()),height);
-								}else*/
-									((Drawable)t).setBounds(0,0,d.getIntrinsicWidth(),d.getIntrinsicHeight());
-								tv.setText(tv.getText());
-							}
-						});
+								@Override
+								public void run()
+								{
+									int maxWidth=ImageGetter.this.width == 0 ?(tv.getWidth() - tv.getPaddingStart() - tv.getPaddingEnd()): (ImageGetter.this.width - tv.getPaddingStart() - tv.getPaddingEnd());
+									float height=d.getIntrinsicHeight();
+									float width=d.getIntrinsicWidth();
+									if (width > maxWidth){
+										height=(int)(maxWidth / (float)d.getIntrinsicWidth() * d.getIntrinsicHeight());
+										width=maxWidth;
+									}else if(d.getIntrinsicHeight()<tv.getLineHeight()+tv.getLineSpacingExtra()){
+										height=tv.getLineHeight()+tv.getLineSpacingExtra();
+										width=height/d.getIntrinsicHeight()*d.getIntrinsicWidth();
+										}
+									((Drawable)t).setBounds(0,0,(int)width,(int)height);
+									//tv.setText(tv.getText());
+									tv.post(new Runnable(){
 
-				}
+											@Override
+											public void run()
+											{
+												tv.setText(tv.getText());
+											}
+										});
+									//int color=tv.getLayout().getPaint().getColor();
+								}
+							});
 
-				@Override
-				public void onError(Target t,Drawable d,Throwable e)
-				{
-				}
-			}).intoPlaceHolder();
+					}
+
+					@Override
+					public void onError(Target t, Drawable d, Throwable e)
+					{
+					}
+				}).intoPlaceHolder();
 			place.setCallback(this);
-			cache.put(p1,place);
+			cache.put(p1, place);
 			return place;
-			}else{}
+		}
+		else
+		{}
 		return d;
 	}
 
 	@Override
 	public void scheduleDrawable(Drawable p1, Runnable p2, long p3)
 	{
+		//tv.postInvalidateOnAnimation();
+		tv.getHandler().postAtTime(p2,p3);
+		//tv.scheduleDrawable(p1, p2, p3);
 	}
 
 	@Override
 	public void invalidateDrawable(Drawable p1)
 	{
-		tv.setText(tv.getText());
+		//tv.setText(tv.getText());
+		tv.postInvalidateOnAnimation();
 	}
 
 	@Override
 	public void unscheduleDrawable(Drawable p1, Runnable p2)
 	{
+		tv.getHandler().removeCallbacks(p2);
+		//tv.unscheduleDrawable(p1, p2);
 	}
 
 
-	
-	}
+
+}

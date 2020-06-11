@@ -14,11 +14,13 @@ import com.moe.pussy.Listener;
 import java.io.File;
 import android.graphics.drawable.Drawable.Callback;
 import com.moe.pussy.Request;
+import android.graphics.ColorFilter;
+import android.graphics.Canvas;
 
-public class DrawableTarget extends LevelListDrawable implements Target
+public class DrawableTarget extends Drawable implements Target,Drawable.Callback
 {
+	private Drawable cache;
 	private ContentBuilder content;
-	private int level;
 	@Override
 	public void onSizeReady(int w, int h)
 	{
@@ -38,33 +40,68 @@ public class DrawableTarget extends LevelListDrawable implements Target
 		//level = 0;
 	}
 
+	@Override
+	public int getOpacity()
+	{
+		if(cache!=null)
+			return cache.getOpacity();
+		return 0;
+	}
+
+	@Override
+	public void setColorFilter(ColorFilter p1)
+	{
+		if(cache!=null)
+			cache.setColorFilter(p1);
+	}
+
+	@Override
+	public void setAlpha(int p1)
+	{
+		if(cache!=null)
+			cache.setAlpha(p1);
+	}
+
+	@Override
+	public void draw(Canvas p1)
+	{
+		if(cache!=null){
+			//cache.setBounds(getBounds());
+			cache.draw(p1);
+		}
+	}
+
+	@Override
+	public void setBounds(int left, int top, int right, int bottom)
+	{
+		super.setBounds(left, top, right, bottom);
+		if(cache!=null)
+			cache.setBounds(left,top,right,bottom);
+	}
+
+	@Override
+	public void setBounds(Rect bounds)
+	{
+		super.setBounds(bounds);
+		if(cache!=null)
+			cache.setBounds(bounds);
+	}
+
+
 
 
 	@Override
 	public void placeHolder(Drawable placeHolder)
 	{
-		addLevel(1, 1, placeHolder);
-		setLevel(1);
-		level = 1;
+		if(cache!=null)
+			cache.setCallback(null);
+		this.cache=placeHolder;
+		if(placeHolder!=null){
+			placeHolder.setBounds(getBounds());
+			placeHolder.setCallback(this);
+			}
 		Listener l=getListener();
 		if (l != null)l.onPlaceHolder(this,placeHolder);
-	}
-
-	@Override
-	public boolean setVisible(boolean visible, boolean restart)
-	{
-		boolean f= super.setVisible(visible, restart);
-		if (getLevel() == 0)
-		{
-			setLevel(level);
-		}
-		/*if(restart)
-		 {
-		 PussyDrawable pd=(PussyDrawable) getCurrent();
-		 if(pd!=null)
-		 pd.start();
-		 }*/
-		return f;
 	}
 
 	
@@ -92,7 +129,8 @@ public class DrawableTarget extends LevelListDrawable implements Target
 	@Override
 	public void onSuccess(PussyDrawable pd)
 	{
-		level = 2;
+		if(cache!=null)
+			cache.setCallback(null);
 		if (pd != null)
 		{
 			pd.stop();
@@ -100,8 +138,9 @@ public class DrawableTarget extends LevelListDrawable implements Target
 			if (anim != null)
 				anim.stop();
 			//pd.setAnimator(anim);
-			addLevel(2, 2, pd);
-			setLevel(2);
+			this.cache=pd;
+			pd.setBounds(getBounds());
+			pd.setCallback(this);
 			Listener l=getListener();
 			if (l != null)l.onSuccess(this,pd);
 			//setBounds(0,0,pd.getIntrinsicWidth(),pd.getIntrinsicHeight());
@@ -118,12 +157,16 @@ public class DrawableTarget extends LevelListDrawable implements Target
 	@Override
 	public void error(Throwable e, Drawable d)
 	{
-		level = 3;
+		if(cache!=null)
+			cache.setCallback(null);
 		DrawableAnimator anim= content.getAnim();
 		if (anim != null)
 			anim.stop();
-		addLevel(3, 3, d);
-		setLevel(3);
+		this.cache=d;
+		if(d!=null){
+			d.setBounds(getBounds());
+			d.setCallback(this);
+			}
 		Listener l=getListener();
 		if(l!=null)l.onError(this,d,e);
 		
@@ -133,6 +176,27 @@ public class DrawableTarget extends LevelListDrawable implements Target
 	public void onAttachContent(ContentBuilder c)
 	{
 		content = c;
+	}
+
+	@Override
+	public void scheduleDrawable(Drawable who, Runnable what, long when)
+	{
+		if(getCallback()!=null)
+		getCallback().scheduleDrawable(who, what, when);
+	}
+
+	@Override
+	public void invalidateDrawable(Drawable who)
+	{
+		if(getCallback()!=null)
+		getCallback().invalidateDrawable(who);
+	}
+
+	@Override
+	public void unscheduleDrawable(Drawable who, Runnable what)
+	{
+		if(getCallback()!=null)
+		getCallback().unscheduleDrawable(who, what);
 	}
 
 	

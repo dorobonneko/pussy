@@ -86,7 +86,7 @@ public class PussyDrawable extends Drawable implements Animatable
 					da.draw(p1,m, bitmap);
 				else
 					p1.drawBitmap(bitmap, m, null);
-			if(image.isGif()&&isVisible())
+			if(image.isGif()&&isVisible())//invalidateSelf();
 				scheduleSelf(Updater,SystemClock.uptimeMillis()+33);
 			}else{
 				//throw new NullPointerException("图片为空");
