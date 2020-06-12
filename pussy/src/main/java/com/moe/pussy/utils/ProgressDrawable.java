@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.TypedValue;
 
 public class ProgressDrawable extends Drawable implements NetListener
 {
@@ -17,6 +18,7 @@ public class ProgressDrawable extends Drawable implements NetListener
 	private int progress=PROGRESS_LOOP,max=100,degress;
 	private ValueAnimator anime;
 	private Paint paint;
+	private Rect rect;
 	public ProgressDrawable()
 	{
 		anime = new ValueAnimator();
@@ -26,11 +28,16 @@ public class ProgressDrawable extends Drawable implements NetListener
 		paint.setStrokeCap(Paint.Cap.ROUND);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(2);
+		rect=new Rect(0,0,50,50);
 	}
 	public ProgressDrawable(Context context)
 	{
 		this();
 		paint.setColor(StyleUtil.getColor(context, android.R.attr.colorControlNormal));
+		int size=(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,48,context.getResources().getDisplayMetrics());
+		rect.set(0,0,size,size);
+		paint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,4,context.getResources().getDisplayMetrics()));
+		
 	}
 	public void setProgress(int progress)
 	{
@@ -56,7 +63,10 @@ public class ProgressDrawable extends Drawable implements NetListener
 	@Override
 	public void draw(Canvas canvas)
 	{
-		Rect bounds=getBounds();
+		//Rect bounds=getBounds();
+		canvas.save();
+		canvas.setMatrix(null);
+		canvas.translate(canvas.getWidth()/2-rect.centerX(),canvas.getHeight()/2-rect.centerY());
 		if (anime.isRunning())
 		{
 			drawProgress(canvas,progress);
@@ -65,7 +75,7 @@ public class ProgressDrawable extends Drawable implements NetListener
 		{
 			if (progress == PROGRESS_LOOP)
 			{
-				RectF bound=new RectF(bounds);
+				RectF bound=new RectF(rect);
 				float halfStroke=paint.getStrokeWidth()/2;
 				bound.left+=halfStroke;
 				bound.top+=halfStroke;
@@ -78,10 +88,10 @@ public class ProgressDrawable extends Drawable implements NetListener
 				drawProgress(canvas,progress);
 			}
 		}
+		canvas.restore();
 	}
 	protected void drawProgress(Canvas canvas,int progress){
-		Rect bounds=getBounds();
-		RectF bound=new RectF(bounds);
+		RectF bound=new RectF(rect);
 		float halfStroke=paint.getStrokeWidth()/2;
 		bound.left+=halfStroke;
 		bound.top+=halfStroke;
@@ -111,13 +121,13 @@ public class ProgressDrawable extends Drawable implements NetListener
 	@Override
 	public int getIntrinsicWidth()
 	{
-		return 48;
+		return rect.width();
 	}
 
 	@Override
 	public int getIntrinsicHeight()
 	{
-		return 48;
+		return rect.height();
 	}
 
 	@Override
