@@ -96,7 +96,7 @@ public class HttpRequestHandler implements RequestHandler
 			int code=huc.getResponseCode();
 			if (request.isCancel())throw new CancellationException();
 			String range=huc.getHeaderField("Content-Range");
-			long length=huc.getContentLengthLong();
+			long length=huc.getContentLength();
 			if (range != null)
 				length = Long.parseLong(range.substring(range.indexOf("/") + 1));
 

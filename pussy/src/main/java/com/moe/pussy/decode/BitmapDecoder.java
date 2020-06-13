@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
+import android.os.Build;
 
 public class BitmapDecoder implements Decoder
 {
@@ -45,7 +46,11 @@ public class BitmapDecoder implements Decoder
 						return null;
 					}
 					}
-					options.inPreferredConfig=options.outConfig==null?Bitmap.Config.RGB_565:options.outConfig;
+					Bitmap.Config config=Bitmap.Config.ARGB_8888;
+					if(Build.VERSION.SDK_INT>=26)
+						config=options.outConfig;
+					
+					options.inPreferredConfig=config==null?Bitmap.Config.ARGB_8888:config;
 					options.inJustDecodeBounds = false;
 					options.inSampleSize = calculateInSampleSize(options, w, h);
 					options.inBitmap = mBitmapPool.getBitmap(options.outWidth, options.outHeight, options.inPreferredConfig);
@@ -91,9 +96,14 @@ public class BitmapDecoder implements Decoder
 						return new Image(mBitmapPool,b);
 					}
 					options.inJustDecodeBounds = false;
-					options.inBitmap=mBitmapPool.getBitmap(options.outWidth,options.outHeight,options.inPreferredConfig);
+					Bitmap.Config config=Bitmap.Config.ARGB_8888;
+					if(Build.VERSION.SDK_INT>=26)
+						config=options.outConfig;
+						if(config==null)
+							config=Bitmap.Config.ARGB_8888;
+					options.inBitmap=mBitmapPool.getBitmap(options.outWidth,options.outHeight,config);
 					options.inMutable = true;
-					options.inPreferredConfig=options.outConfig;
+					options.inPreferredConfig=config;
 					options.inSampleSize=calculateInSampleSize(options,w,h);
 					return new Image(mBitmapPool,BitmapFactory.decodeResource(context.getResources(), id, options));
 

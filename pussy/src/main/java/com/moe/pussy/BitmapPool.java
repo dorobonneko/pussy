@@ -173,15 +173,14 @@ public class BitmapPool extends LinkedHashMap<Integer,Stack<Bitmap>>
 				bytesPerPixel = 1;
 				break;
 			case RGB_565:
+			bytesPerPixel=2;
+				break;
 			case ARGB_4444:
-				bytesPerPixel = 2;
-				break;
-			case RGBA_F16:
-				bytesPerPixel = 8;
-				break;
 			case ARGB_8888:
+				bytesPerPixel=4;
+				break;
 			default:
-				bytesPerPixel = 4;
+				bytesPerPixel = 8;
 				break;
 		}
 		return bytesPerPixel;
