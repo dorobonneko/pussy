@@ -156,7 +156,9 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 				{
 					//原始缓存
 					if (isCancel())return;
-						getTarget().onResourceReady(Uri.fromFile(disk_file).toString(),getRequest());
+					Target t=getTarget();
+					if(t!=null)
+						t.onResourceReady(Uri.fromFile(disk_file).toString(),getRequest());
 					//getPussy().fileThreadPool.execute(new BitmapLoader(getPussy().getBitmapPool(),getPussy().decoder, getRequest().getKey(), cache_file, this));
 				}
 				else
