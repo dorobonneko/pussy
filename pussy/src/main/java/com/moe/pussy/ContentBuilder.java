@@ -38,7 +38,7 @@ public class ContentBuilder implements SizeReady
 		DownloadTarget t=new DownloadTarget(output);
 		target=t;
 		t.onAttachContent(this);
-		t.placeHolder(placeHolder);
+		//t.placeHolder(placeHolder);
 		loader=new Loader(this);
 		if(delay>0)
 			Pussy.post(new Runnable(){

@@ -9,6 +9,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.io.IOException;
 import android.net.Uri;
+import com.moe.pussy.Pussy;
 
 public class DownloadTarget implements Target
 {
@@ -56,23 +57,33 @@ public class DownloadTarget implements Target
 				return;
 			}
 		}
-		getContent().getRefresh().cancel();
-		if (getListener() != null)
-			getListener().onSuccess(this, null);
+		//未加载图片，不需要此操作
+		//getContent().getRefresh().cancel();
+		onSuccess(null);
 	}
 
 	@Override
 	public void onSuccess(PussyDrawable pd)
 	{
-
+		Pussy.post(new Runnable(){
+			public void run(){
+		if (getListener() != null)
+			getListener().onSuccess(DownloadTarget.this, null);
+			}
+			});
 	}
 
 	@Override
-	public void error(Throwable e, Drawable d)
+	public void error(final Throwable e, Drawable d)
 	{
-		getContent().getRefresh().cancel();
+		//无需取消
+		//getContent().getRefresh().cancel();
+		Pussy.post(new Runnable(){
+			public void run(){
 		if (getListener() != null)
-			getListener().onError(this, d,e);
+			getListener().onError(DownloadTarget.this, null,e);
+			}
+			});
 	}
 
 	@Override
