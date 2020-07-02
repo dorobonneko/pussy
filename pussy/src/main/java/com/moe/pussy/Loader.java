@@ -198,33 +198,31 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 		{
 			Image source=null;
 			File cache=getPussy().getDiskCache().getCache(requestKey);
-			if(requestKey.startsWith("2ec")){
-				toString();
-			}
 			if (cache != null)
 				source = getPussy().decoder.decode(getPussy().getBitmapPool(),Uri.fromFile(cache),content.get().isAsBitmap(), w, h);
 			else if(resource!=null)
 				source = getPussy().decoder.decode(getPussy().getBitmapPool(),Uri.parse(resource),content.get().isAsBitmap(),w,h);
-			if (source == null)
+			if (source == null||source.getBitmap()==null)
 			{
 				if (cache != null)
 					cache.delete();
+				getPussy().request_handler.remove(requestKey);
 				success(null, new NullPointerException("possible bitmap decoder error"));
 				return;
 				}
 			if(!source.isGif()){
-				Bitmap sourceBitmap=source.source();
+				Bitmap sourceBitmap=source.getBitmap();
 			for (Transformer transformer:content.get().getTransformer())
 			{
 				sourceBitmap = transformer.onTransformer(getPussy().mBitmapPool, sourceBitmap, w, h);
 			}
-			source.setBitmap(sourceBitmap);
+			source=Image.parse(sourceBitmap);
 			}
 			success(getPussy().getActiveResource().create(key, source), null);
 			try
 			{
 				if (!source.isGif()&&content.get().getCache() == DiskCache.Cache.MASK)
-					source.source().compress(Bitmap.CompressFormat.WEBP, 99, new FileOutputStream(getPussy().getDiskCache().getCache(content.get().getKey())));
+					source.getBitmap().compress(Bitmap.CompressFormat.WEBP, 99, new FileOutputStream(getPussy().getDiskCache().getCache(content.get().getKey())));
 			}
 			catch (FileNotFoundException e)
 			{}

@@ -23,7 +23,7 @@ public class ProgressDrawable extends Drawable implements NetListener
 	{
 		anime = new ValueAnimator();
 		anime.addUpdateListener(new Update());
-		paint = new Paint();
+		paint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
 		paint.setColor(0xffffffff);
 		paint.setStrokeCap(Paint.Cap.ROUND);
 		paint.setStyle(Paint.Style.STROKE);
@@ -105,7 +105,9 @@ public class ProgressDrawable extends Drawable implements NetListener
 	{
 		paint.setAlpha(p1);
 	}
-
+	public void setColor(int color){
+		this.paint.setColor(color);
+	}
 	@Override
 	public void setColorFilter(ColorFilter p1)
 	{

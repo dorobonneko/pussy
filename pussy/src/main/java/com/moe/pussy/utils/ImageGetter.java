@@ -44,8 +44,12 @@ public class ImageGetter implements Html.ImageGetter,Drawable.Callback
 	@Override
 	public android.graphics.drawable.Drawable getDrawable(String p1)
 	{
-		if (!p1.startsWith("http"))
+		if (p1.startsWith("/"))
 			p1 = host + p1;
+		else if(p1.startsWith("http"))
+		{}
+		else
+			p1=host+"/"+p1;
 		Drawable d=cache.get(p1);
 		if (d == null)
 		{
@@ -108,7 +112,7 @@ public class ImageGetter implements Html.ImageGetter,Drawable.Callback
 	public void scheduleDrawable(Drawable p1, Runnable p2, long p3)
 	{
 		//tv.postInvalidateOnAnimation();
-		tv.getHandler().postAtTime(p2,p3);
+		tv.getHandler().postDelayed(p2,p3);
 		//tv.scheduleDrawable(p1, p2, p3);
 	}
 

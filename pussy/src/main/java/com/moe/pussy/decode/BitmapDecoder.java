@@ -39,9 +39,9 @@ public class BitmapDecoder implements Decoder
 					try
 					{
 						if ("image/gif".equalsIgnoreCase(options.outMimeType))
-							return new Image(mBitmapPool, new FileInputStream(input.getPath()));
+							return Image.parse(mBitmapPool,input.getPath());
 					}
-					catch (FileNotFoundException e)
+					catch (Exception e)
 					{
 						return null;
 					}
@@ -71,7 +71,7 @@ public class BitmapDecoder implements Decoder
 						bitmap = null;
 					}
 					if(bitmap==null)return null;
-					return new Image(mBitmapPool,bitmap);
+					return Image.parse(bitmap);
 				}
 			case "drawable":
 				{
@@ -93,7 +93,7 @@ public class BitmapDecoder implements Decoder
 						Canvas canvas=new Canvas(b);
 						d.setBounds(0,0,w,h);
 						d.draw(canvas);
-						return new Image(mBitmapPool,b);
+						return Image.parse(b);
 					}
 					options.inJustDecodeBounds = false;
 					Bitmap.Config config=Bitmap.Config.ARGB_8888;
@@ -105,7 +105,7 @@ public class BitmapDecoder implements Decoder
 					options.inMutable = true;
 					options.inPreferredConfig=config;
 					options.inSampleSize=calculateInSampleSize(options,w,h);
-					return new Image(mBitmapPool,BitmapFactory.decodeResource(context.getResources(), id, options));
+					return Image.parse(BitmapFactory.decodeResource(context.getResources(), id, options));
 
 				}
 		}

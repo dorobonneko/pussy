@@ -15,6 +15,7 @@ import android.view.View;
 import com.moe.pussy.target.DrawableTarget;
 import java.io.File;
 import com.moe.pussy.target.DownloadTarget;
+import android.content.Context;
 
 public class ContentBuilder implements SizeReady
 {
@@ -52,6 +53,9 @@ public class ContentBuilder implements SizeReady
 		else
 			loader.loadFromCache();
 		
+	}
+	public Context getContext(){
+		return request.getPussy().getContext();
 	}
 	public ContentBuilder delay(long delay){
 		this.delay=delay;

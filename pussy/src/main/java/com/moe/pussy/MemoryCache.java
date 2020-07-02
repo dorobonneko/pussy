@@ -18,10 +18,10 @@ public class MemoryCache extends LruCache<String,Image>
 	protected void entryRemoved(boolean evicted, String key, Image oldValue, Image newValue)
 	{
 		if(evicted){
-			bp.recycle(oldValue.source());
+			bp.recycle(oldValue.getBitmap());
 		}else{
 			if(newValue!=null){
-				bp.recycle(oldValue.source());
+				bp.recycle(oldValue.getBitmap());
 			}
 		}
 	}
@@ -29,7 +29,7 @@ public class MemoryCache extends LruCache<String,Image>
 	@Override
 	protected int sizeOf(String key, Image value)
 	{
-		Bitmap b=value.source();
+		Bitmap b=value.getBitmap();
 		if(b!=null)
 			return b.getByteCount();
 			return 0;

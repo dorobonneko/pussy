@@ -6,79 +6,139 @@ import android.graphics.Canvas;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Paint;
 import java.io.IOException;
+import pl.droidsonroids.gif.GifDecoder;
+import java.io.File;
+import android.graphics.BitmapFactory;
+import pl.droidsonroids.gif.InputSource;
+import java.io.FileDescriptor;
 
-public class Image
-{
-	private Movie mMovie;
-	private long time;
-	private Bitmap mBitmap;
-	private BitmapPool bp;
-	private Canvas canvas;
-	public Image(BitmapPool bp, InputStream input)
+public abstract class Image
+{	
+	public static Image parse(BitmapPool bp, String input)
 	{
-		this.bp = bp;
-		mMovie = Movie.decodeStream(input);
-		try
-		{
-			input.close();
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException("gif decode error");
-		}
-		mBitmap = bp.getBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-		canvas = new Canvas(mBitmap);
-		canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.DITHER_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
+		return new ImageGif(bp, input);
 	}
-	public Image(BitmapPool bp, Bitmap mBitmap)
+	public static Image parse(Bitmap bitmap)
 	{
-		this.bp = bp;
-		this.mBitmap = mBitmap;
+		if(bitmap==null)
+			return null;
+		return new ImageBitmap(bitmap);
 	}
 
-	public void setBitmap(Bitmap sourceBitmap)
+	public abstract int getWidth();
+	public abstract int getHeight();
+	public abstract long advance();
+	public abstract boolean isGif();
+	public abstract Bitmap getBitmap();
+	public static class ImageBitmap extends Image
 	{
-		mBitmap=sourceBitmap;
-	}
-	public int getWidth()
-	{
-		if (mBitmap != null)
-			return mBitmap.getWidth();
-			if(mMovie!=null)
-		return mMovie.width();
-		return 0;
-	}
-	public int getHeight()
-	{
-		if (mBitmap != null)
-			return mBitmap.getHeight();
-			if(mMovie!=null)
-		return mMovie.height();
-		return 0;
-	}
-	public Bitmap source()
-	{
-		return mBitmap;
-	}
-	public Bitmap getBitmap()
-	{
-		if (mMovie != null)
+		private Bitmap bitmap;
+		public ImageBitmap(Bitmap bitmap)
 		{
-			if (time == 0)
-				time = System.currentTimeMillis();
-			int disc=(int)(System.currentTimeMillis() - time);
-			if (disc > mMovie.duration())
+			this.bitmap = bitmap;
+		}
+		@Override
+		public int getWidth()
+		{
+			return bitmap.getWidth();
+		}
+
+		@Override
+		public int getHeight()
+		{
+			return bitmap.getHeight();
+		}
+
+		@Override
+		public long advance()
+		{
+			return -1;
+		}
+
+		@Override
+		public boolean isGif()
+		{
+			return false;
+		}
+
+		@Override
+		public Bitmap getBitmap()
+		{
+			return bitmap;
+		}
+
+
+
+	}
+	public static class ImageGif extends Image
+	{
+		private GifDecoder decoder;
+		private Bitmap bitmap;
+		private int frameCount;
+		private long time;
+		public ImageGif(BitmapPool bp, String input)
+		{
+			try
 			{
-				disc = 0;
-				time = System.currentTimeMillis();
+				decoder = new GifDecoder(new InputSource.FileSource(input));
+				frameCount = decoder.getNumberOfFrames();
+				if(frameCount==1){
+					//decoder.recycle();
+				bitmap = BitmapFactory.decodeFile(input);
+				decoder.recycle();
+				}else
+				{
+					bitmap=bp.getBitmap(decoder.getWidth(),decoder.getHeight(),Bitmap.Config.ARGB_8888);
+				}
 			}
-			mMovie.setTime(disc);
-			mBitmap.eraseColor(0);
-			mMovie.draw(canvas, 0, 0);
+			catch (IOException e)
+			{}
 		}
-		return mBitmap;
-	}
-	public boolean isGif(){
-		return mMovie!=null;
+		@Override
+		public int getWidth()
+		{
+			return decoder.getWidth();
+		}
+
+		@Override
+		public int getHeight()
+		{
+			return decoder.getHeight();
+		}
+
+		@Override
+		public long advance()
+		{
+			if (frameCount == 1){
+				decoder.seekToTime(0,bitmap);
+				return 0;
+				}
+			if(time==0)
+				time=System.currentTimeMillis();
+			int duration=(int)(System.currentTimeMillis()-time);
+			if(duration>=decoder.getDuration()){
+				time=System.currentTimeMillis();
+				duration=0;
+				}
+			decoder.seekToTime(duration,bitmap);
+			//decoder.seekToFrame(frame++, bitmap);
+			//len = decoder.getFrameDuration(frame);
+			return 33;
+		}
+
+		@Override
+		public boolean isGif()
+		{
+			return decoder.isAnimated();
+		}
+
+		@Override
+		public Bitmap getBitmap()
+		{
+			return bitmap;
+		}
+
+
+
 	}
 }

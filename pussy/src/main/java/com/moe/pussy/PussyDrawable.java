@@ -12,6 +12,8 @@ import android.graphics.PorterDuff;
 import android.os.SystemClock;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 
 public class PussyDrawable extends Drawable implements Animatable
 {
@@ -82,12 +84,13 @@ public class PussyDrawable extends Drawable implements Animatable
 			float scale=Math.max(bounds.width()/(float)image.getWidth(),bounds.height()/(float)image.getHeight());
 			m.setScale(scale,scale);
 			m.postTranslate((bounds.width()-(image.getWidth()*scale))/2f,(bounds.height()-image.getHeight()*scale)/2f);
+			long nextFrame=image.advance();
 			if (da != null)
 					da.draw(p1,m, bitmap);
 				else
 					p1.drawBitmap(bitmap, m, null);
-			if(image.isGif()&&isVisible())//invalidateSelf();
-				scheduleSelf(Updater,SystemClock.uptimeMillis()+33);
+			if(image.isGif()&&isVisible()&&nextFrame>0)//invalidateSelf();
+				handler.postDelayed(Updater,nextFrame);
 			}else{
 				//throw new NullPointerException("图片为空");
 			}
@@ -107,7 +110,7 @@ public class PussyDrawable extends Drawable implements Animatable
 	public boolean setVisible(boolean visible, boolean restart)
 	{
 		if(!visible)
-			unscheduleSelf(Updater);
+			handler.removeCallbacks(Updater);
 		return super.setVisible(visible, restart);
 	}
 
@@ -151,5 +154,5 @@ public class PussyDrawable extends Drawable implements Animatable
 			invalidateSelf();
 		}
 	};
-
+	private Handler handler=new Handler(Looper.getMainLooper());
 }

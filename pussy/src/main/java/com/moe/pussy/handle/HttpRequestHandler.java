@@ -133,8 +133,8 @@ public class HttpRequestHandler implements RequestHandler
 				while ((len = input.read()) != -1)
 				{
 					output.write(len);
-					current+=len;
-					call.onProgress(current,length);
+					current++;
+					call.onProgress(current,current);
 					if (request.isCancel())
 						throw new CancellationException();
 					//output.flush();
@@ -161,6 +161,7 @@ public class HttpRequestHandler implements RequestHandler
 				tmp.renameTo(cache);
 			if (request.isCancel())
 				throw new CancellationException();
+			if(cache.exists())
 			hrs.set(dc.getCache(request.getKey()));
 		}
 		catch (SocketTimeoutException e)

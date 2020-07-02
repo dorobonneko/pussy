@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.io.IOException;
 import android.net.Uri;
 import com.moe.pussy.Pussy;
+import android.media.MediaScannerConnection;
 
 public class DownloadTarget implements Target
 {
@@ -50,6 +51,7 @@ public class DownloadTarget implements Target
 			try
 			{
 				Files.copy(new File(Uri.parse(cache).getPath()).toPath(), output.toPath());
+				MediaScannerConnection.scanFile(getContent().getContext(),new String[]{output.getAbsolutePath()},new String[]{"image/*"},null);
 			}
 			catch (IOException e)
 			{
