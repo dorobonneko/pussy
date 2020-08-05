@@ -291,8 +291,8 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 		//Pussy.checkThread(false);
 		if (isCancel())
 		{
-			if (res != null)
-				res.release();
+			//if (res != null)
+				//res.release();
 			return;
 		}
 		if (res == null)
