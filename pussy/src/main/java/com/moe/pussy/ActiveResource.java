@@ -4,10 +4,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import android.graphics.Bitmap;
+import java.util.Hashtable;
 
 public class ActiveResource implements Resource.OnResourceListener
 {
-	private Map<String,Resource> list=new ConcurrentHashMap<>();
+	private Map<String,Resource> list=new Hashtable<>();
 	private Pussy pussy;
 	public ActiveResource(Pussy pussy){
 		this.pussy=pussy;
@@ -44,11 +45,15 @@ public class ActiveResource implements Resource.OnResourceListener
 		return list.remove(key);
 	}
 	@Override
-	public void onResourceRelease(Resource res)
+	public void onResourceRelease(final Resource res)
 	{
 		remove(res.key);
+		res.setOnResourceListener(null);
+		//res.image.getBitmap().recycle();
 		pussy.getMemoryCache().put(res.key,res.image);
-	}
+		res.image.recycle();
+		
+		}
 
 	
 }

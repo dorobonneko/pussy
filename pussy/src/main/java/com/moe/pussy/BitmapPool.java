@@ -56,6 +56,7 @@ public class BitmapPool extends LinkedHashMap<Integer,Stack<Bitmap>>
 	}
 	public void recycle(Bitmap bitmap)
 	{
+		//bitmap.recycle();
 		if (bitmap == null || bitmap.isRecycled())return;
 		if (!bitmap.isMutable())
 		{

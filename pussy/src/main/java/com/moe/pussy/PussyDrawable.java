@@ -14,17 +14,18 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.ImageView;
 
 public class PussyDrawable extends Drawable implements Animatable
 {
-	public WeakReference<Image> bitmap;
+	public Image bitmap;
 	//private WeakReference<Pussy.Refresh> refresh;
 	private DrawableAnimator da;
 	//private WeakReference<Target> t;
 	public PussyDrawable(Image bitmap,DrawableAnimator da)
 	{
 		if(bitmap==null)throw new NullPointerException("bjtmal 为空");
-		this.bitmap =new WeakReference<Image>(bitmap);
+		this.bitmap =bitmap;
 		this.da=da;
 		if(da!=null)
 			da.setCallback(this);
@@ -68,8 +69,9 @@ public class PussyDrawable extends Drawable implements Animatable
 	@Override
 	public void draw(Canvas p1)
 	{
+		try{
 		p1.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.DITHER_FLAG|Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG));
-		Image image=this.bitmap.get();
+		Image image=this.bitmap;
 		if (image != null){
 			/*if(image.isGif()){
 				float scale=Math.max(p1.getWidth()/(float)image.getWidth(),p1.getHeight()/(float)image.getHeight());
@@ -92,8 +94,9 @@ public class PussyDrawable extends Drawable implements Animatable
 			if(image.isGif()&&isVisible()&&nextFrame>0)//invalidateSelf();
 				handler.postDelayed(Updater,nextFrame);
 			}else{
-				//throw new NullPointerException("图片为空");
+				throw new NullPointerException("图片为空");
 			}
+			}catch(IllegalStateException e){}
 	}
 
 	@Override
@@ -132,7 +135,7 @@ public class PussyDrawable extends Drawable implements Animatable
 	@Override
 	public int getIntrinsicWidth()
 	{
-		Image bitmap=this.bitmap.get();
+		Image bitmap=this.bitmap;
 		if (bitmap != null)
 			return bitmap.getWidth();
 		return super.getIntrinsicWidth();
@@ -141,7 +144,7 @@ public class PussyDrawable extends Drawable implements Animatable
 	@Override
 	public int getIntrinsicHeight()
 	{
-		Image bitmap=this.bitmap.get();
+		Image bitmap=this.bitmap;
 		if (bitmap != null)
 			return bitmap.getHeight();
 		return super.getIntrinsicHeight();

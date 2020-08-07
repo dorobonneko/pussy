@@ -17,7 +17,7 @@ import java.io.File;
 import com.moe.pussy.target.DownloadTarget;
 import android.content.Context;
 
-public class ContentBuilder implements SizeReady
+public class ContentBuilder implements SizeReady,Runnable
 {
 	private Request request;
 	private String key=null,tag;
@@ -32,16 +32,18 @@ public class ContentBuilder implements SizeReady
 	private Listener listener;
 	private long delay;
 	private boolean asBitmap;
-	public ContentBuilder(Request r){
-		this.request=r;
+	public ContentBuilder(Request r)
+	{
+		this.request = r;
 	}
-	public void download(File output){
+	public void download(File output)
+	{
 		DownloadTarget t=new DownloadTarget(output);
-		target=t;
+		target = t;
 		t.onAttachContent(this);
 		//t.placeHolder(placeHolder);
-		loader=new Loader(this);
-		if(delay>0)
+		loader = new Loader(this);
+		if (delay > 0)
 			Pussy.post(new Runnable(){
 
 					@Override
@@ -52,165 +54,212 @@ public class ContentBuilder implements SizeReady
 				}, delay);
 		else
 			loader.loadFromCache();
-		
+
 	}
-	public Context getContext(){
+	public Context getContext()
+	{
 		return request.getPussy().getContext();
 	}
-	public ContentBuilder delay(long delay){
-		this.delay=delay;
+	public ContentBuilder delay(long delay)
+	{
+		this.delay = delay;
 		return this;
 	}
 	@Override
 	public void onSizeReady(int w, int h)
 	{
-		if(target!=null)
-		loader.onSizeReady(w,h);
+		if (target != null)
+			loader.onSizeReady(w, h);
 	}
-	public ContentBuilder asBitmap(){
-		asBitmap=true;
+	public ContentBuilder asBitmap()
+	{
+		asBitmap = true;
 		return this;
 	}
-	protected boolean isAsBitmap(){
+	protected boolean isAsBitmap()
+	{
 		return asBitmap;
 	}
-	public ContentBuilder listener(Listener l){
-		listener=l;
+	public ContentBuilder listener(Listener l)
+	{
+		listener = l;
 		return this;
 	}
-	public Listener getListener(){
+	public Listener getListener()
+	{
 		return listener;
 	}
 	void cancel()
 	{
 		Pussy.checkThread(true);
 		//loader.pause();
-		if(target==null)return;
-		target=null;
-		if(request.getKey()!=null){
+		if (target == null)return;
+		target = null;
+		if (request.getKey() != null)
+		{
 			HandleThread ht=request.getPussy().request_handler.get(request.getKey());
 			if (ht != null)
 				ht.removeCallback(loader);
-			}
+		}
 	}
-	
-	public ContentBuilder tag(String tag){
-		this.tag=tag;
+
+	public ContentBuilder tag(String tag)
+	{
+		this.tag = tag;
 		return this;
 	}
-	String tag(){
+	String tag()
+	{
 		return tag;
 	}
-	public ContentBuilder placeHolder(Drawable res){
-		placeHolder=res;
+	public ContentBuilder placeHolder(Drawable res)
+	{
+		placeHolder = res;
 		return this;
 	}
-	public ContentBuilder error(Drawable res){
-		error=res;
+	public ContentBuilder error(Drawable res)
+	{
+		error = res;
 		return this;
 	}
-	public ContentBuilder placeHolder(int res){
-		placeHolder=request.getPussy().getContext().getResources().getDrawable(res);
+	public ContentBuilder placeHolder(int res)
+	{
+		placeHolder = request.getPussy().getContext().getResources().getDrawable(res);
 		return this;
 	}
-	public ContentBuilder error(int res){
-		error=request.getPussy().getContext().getResources().getDrawable(res);
+	public ContentBuilder error(int res)
+	{
+		error = request.getPussy().getContext().getResources().getDrawable(res);
 		return this;
 	}
-	public Pussy.Refresh getRefresh(){
-		if(r==null)
-			r=new Pussy.Refresh(this);
-			return r;
+	public Pussy.Refresh getRefresh()
+	{
+		if (r == null)
+			r = new Pussy.Refresh(this);
+		return r;
 	}
-	public final DrawableAnimator getAnim(){
+	public final DrawableAnimator getAnim()
+	{
 		return anim;
 	}
-	public ContentBuilder anime(DrawableAnimator anim){
-		this.anim=anim;
+	public ContentBuilder anime(DrawableAnimator anim)
+	{
+		this.anim = anim;
 		return this;
 	}
-	public ContentBuilder transformer(Transformer... trans){
+	public ContentBuilder transformer(Transformer... trans)
+	{
 		mTransformers.addAll(Arrays.asList(trans));
 		return this;
 	}
-	Request getRequest(){
+	Request getRequest()
+	{
 		return request;
 	}
-	Target getTarget(){
+	Target getTarget()
+	{
 		return  target;
 	}
-	DiskCache.Cache getCache(){
+	DiskCache.Cache getCache()
+	{
 		return cache;
 	}
-	public ContentBuilder diskCache(DiskCache.Cache cache){
-		this.cache=cache;
+	public ContentBuilder diskCache(DiskCache.Cache cache)
+	{
+		this.cache = cache;
 		return this;
 	}
-	boolean refresh(Target t){
+	boolean refresh(Target t)
+	{
 		Pussy.checkThread(true);
-		if(loader.isCancel()){
-		target=t;
-		t.placeHolder(placeHolder);
-		loader.begin();
-		}else if(!loader.resume())
+		if (loader.isCancel())
 		{
+			target = t;
+			t.placeHolder(placeHolder);
+			loader.begin();
+		}
+		else
+		{
+			loader.resume();
 			loader.begin();
 		}
 		return true;
 	}
-	public void into(Target t){
-		if(t==null)return;
-		ContentBuilder oldContent=t.getContent();
-		target=t;
+	public void into(Target t)
+	{
+		if (t == null)return;
+		if(equals(t.getContent())){
+			if(t.getContent().getRequest().isCancel())
+				t.getContent().refresh(t);
+		}else{
+		Pussy.remove(t.getContent());
+		//request.getPussy().cancel(t);
+		target = t;
 		t.onAttachContent(this);
 		t.placeHolder(placeHolder);
-		request.getPussy().cancel(oldContent,getRequest());
-		loader=new Loader(this);
-		if(delay>0)
-			Pussy.post(new Runnable(){
+		loader = new Loader(this);
+		if (delay > 0)
+			Pussy.post(this, delay);
+		else
+			loader.begin();
+			}
+	}
 
-					@Override
-					public void run()
-					{
-						loader.begin();
-					}
-				}, delay);
-			else
+	@Override
+	public void run()
+	{
 		loader.begin();
-		}
-	public void into(ImageView view){
+	}
+
+	@Override
+	public boolean equals(Object obj)
+
+	{
+		if (obj instanceof ContentBuilder)
+			return getKey().equals(((ContentBuilder)obj).getKey());
+		return super.equals(obj);
+	}            
+
+
+	public void into(ImageView view)
+	{
 		//view.setImageDrawable(null);
 		ImageViewTarget ivt=(ImageViewTarget) view.getTag();
-		if(ivt==null)
-			view.setTag(ivt=new ImageViewTarget(view));
-			//ivt.placeHolder(placeHolder);
-			into(ivt);
-	}
-	public void into(View view){
-		//view.setImageDrawable(null);
-		ViewBackgroundTarget ivt=(ViewBackgroundTarget) view.getTag();
-		if(ivt==null)
-			view.setTag(ivt=new ViewBackgroundTarget(view));
+		if (ivt == null)
+			view.setTag(ivt = new ImageViewTarget(view));
 		//ivt.placeHolder(placeHolder);
 		into(ivt);
 	}
-	public DrawableTarget intoPlaceHolder(){
+	public void into(View view)
+	{
+		//view.setImageDrawable(null);
+		ViewBackgroundTarget ivt=(ViewBackgroundTarget) view.getTag();
+		if (ivt == null)
+			view.setTag(ivt = new ViewBackgroundTarget(view));
+		//ivt.placeHolder(placeHolder);
+		into(ivt);
+	}
+	public DrawableTarget intoPlaceHolder()
+	{
 		DrawableTarget dt=new DrawableTarget();
 		into(dt);
 		return dt;
 	}
-	String getKey(){
-		if(key==null){
-			if(request.getKey()==null)return null;
+	String getKey()
+	{
+		if (key == null)
+		{
+			if (request.getKey() == null)return null;
 			StringBuilder sb=new StringBuilder();
 			sb.append(request.getKey());
-			for(Transformer t:mTransformers)
-			sb.append(t.getKey());
-			key=Uid.fromString(sb.toString()).toString();
+			for (Transformer t:mTransformers)
+				sb.append(t.getKey());
+			key = Uid.fromString(sb.toString()).toString();
 		}
 		return key;
 	}
-	Transformer[] getTransformer(){
+	Transformer[] getTransformer()
+	{
 		return mTransformers.toArray(new Transformer[0]);
 	}
 }

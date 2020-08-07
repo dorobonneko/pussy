@@ -11,28 +11,42 @@ public class Resource
 	int count;
 	private Lock lock=new ReentrantLock();
 	private OnResourceListener listener;
-	protected Resource(String key,Image bitmap){
-		this.key=key;
-		this.image=bitmap;
+	protected Resource(String key, Image bitmap)
+	{
+		this.key = key;
+		this.image = bitmap;
 	}
-	public void acquire(){
+	public void acquire()
+	{
 		lock.lock();
-		try{
-		count++;}finally{
+		try
+		{
+			if(listener==null)
+				throw new IllegalStateException("已经销毁");
+			count++;
+			}
+		finally
+		{
 			lock.unlock();
 		}
 	}
-	public void release(){
+	public void release()
+	{
 		lock.lock();
-		try{
-		if(--count==0)
-			listener.onResourceRelease(this);
-			}finally{lock.unlock();}
+		try
+		{
+			if (--count <= 0&&listener!=null)
+				listener.onResourceRelease(this);
+		}
+		finally
+		{lock.unlock();}
 	}
-	public void setOnResourceListener(OnResourceListener l){
-		listener=l;
+	public void setOnResourceListener(OnResourceListener l)
+	{
+		listener = l;
 	}
-	public interface OnResourceListener{
+	public interface OnResourceListener
+	{
 		void onResourceRelease(Resource res);
 	}
 }

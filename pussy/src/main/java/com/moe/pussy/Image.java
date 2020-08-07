@@ -30,9 +30,12 @@ public abstract class Image
 	public abstract long advance();
 	public abstract boolean isGif();
 	public abstract Bitmap getBitmap();
+	public abstract void recycle();
 	public static class ImageBitmap extends Image
 	{
 		private Bitmap bitmap;
+		private boolean recycle;
+		private String stack;
 		public ImageBitmap(Bitmap bitmap)
 		{
 			this.bitmap = bitmap;
@@ -67,6 +70,18 @@ public abstract class Image
 			return bitmap;
 		}
 
+		@Override
+		public void recycle()
+		{
+			StringBuilder sb=new StringBuilder();
+			for(StackTraceElement e:Thread.currentThread().getStackTrace()){
+				sb.append(e.toString());
+			}
+			stack=sb.toString();
+			recycle=true;
+		}
+
+
 
 
 	}
@@ -76,6 +91,7 @@ public abstract class Image
 		private Bitmap bitmap;
 		private int frameCount;
 		private long time;
+		private boolean recycle;
 		public ImageGif(BitmapPool bp, String input)
 		{
 			try
@@ -94,6 +110,14 @@ public abstract class Image
 			catch (IOException e)
 			{}
 		}
+
+		@Override
+		public void recycle()
+		{
+			recycle=true;
+		}
+
+		
 		@Override
 		public int getWidth()
 		{

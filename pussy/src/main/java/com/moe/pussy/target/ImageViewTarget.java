@@ -10,6 +10,8 @@ import android.graphics.drawable.Drawable;
 import com.moe.pussy.BitmapPool;
 import java.util.ArrayList;
 import com.moe.pussy.Listener;
+import android.view.View;
+import android.graphics.drawable.ColorDrawable;
 
 public class ImageViewTarget extends ViewTarget
 {
@@ -21,7 +23,13 @@ public class ImageViewTarget extends ViewTarget
 	public void onCancel()
 	{
 		if(getView()!=null)
-		((ImageView)getView()).setImageDrawable(null);
+		getView().setImageDrawable(null);
+	}
+
+	@Override
+	public ImageView getView()
+	{
+		return (ImageView)super.getView();
 	}
 
 

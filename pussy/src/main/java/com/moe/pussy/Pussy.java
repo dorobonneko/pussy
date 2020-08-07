@@ -184,6 +184,9 @@ public class Pussy
 	public static void post(Runnable run,long delay){
 		mainHandler.postDelayed(run,delay);
 	}
+	public static void remove(Runnable run){
+		mainHandler.removeCallbacks(run);
+	}
 	public void userAgent(String useragent)
 	{
 		this.userAgent = useragent;
@@ -242,21 +245,22 @@ public class Pussy
 			c.loader.resume();
 		}
 	}
-	public void cancel(ContentBuilder content, Request request)
+	public void cancel(Target target)
 	{
+		ContentBuilder content=target.getContent();
 		if (content != null)
 		{
 			content.cancel();
-			String request_key=content.getRequest().getKey();
-			String old_request_key=request!=null?request.getKey():null;
-			if (request_key!=null&&!request_key.equals(old_request_key)){
-				HandleThread ht=request_handler.remove(request_key);
+			content.getRequest().cancel(true);
+			HandleThread ht=request_handler.remove(content.getRequest().getKey());
 				if (ht != null)
 					ht.cancel();
-			}
+			target.onCancel();
 			Resource res=getActiveResource().get(content.getKey());
-			if (res != null)
+			if (res != null){
 				res.release();
+				
+				}
 			//t.onResourceReady(null,null);
 
 		}else{
@@ -423,8 +427,7 @@ public class Pussy
 			return l.refresh(t);
 		}
 		public void cancel(){
-			l.getTarget().onCancel();
-			l.getRequest().getPussy().cancel(l.getTarget().getContent(),null);
+			l.getRequest().getPussy().cancel(l.getTarget());
 		}
 	}
 }

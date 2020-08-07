@@ -58,6 +58,16 @@ public class Request
 			key=Uid.fromString(url);
 			return key;
 	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj instanceof Request){
+			return getKey().equals(((Request)obj).getKey());
+		}
+		return super.equals(obj);
+	}
+	
 	public String getUrl(){
 		return location==null?url:location;
 	}
