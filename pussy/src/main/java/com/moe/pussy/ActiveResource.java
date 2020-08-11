@@ -13,7 +13,9 @@ public class ActiveResource implements Resource.OnResourceListener
 	public ActiveResource(Pussy pussy){
 		this.pussy=pussy;
 	}
-
+	public int size(){
+		return list.size();
+	}
 	public Resource create(String key, Image bitmap)
 	{
 		//if(key==null||bitmap==null||bitmap.isRecycled())throw new RuntimeException("create resource error, key android bitmap must not null and not recycle");
@@ -52,8 +54,18 @@ public class ActiveResource implements Resource.OnResourceListener
 		//res.image.getBitmap().recycle();
 		pussy.getMemoryCache().put(res.key,res.image);
 		res.image.recycle();
+		res.image=null;
 		
-		}
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder sb=new StringBuilder();
+		for(Map.Entry<String,Resource> entry:list.entrySet())
+		sb.append(entry.getKey()).append("##").append(entry.getValue().toString()).append("\n");
+		return sb.toString();
+	}
 
 	
 }

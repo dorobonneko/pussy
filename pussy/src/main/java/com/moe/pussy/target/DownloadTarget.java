@@ -11,13 +11,16 @@ import java.io.IOException;
 import android.net.Uri;
 import com.moe.pussy.Pussy;
 import android.media.MediaScannerConnection;
+import android.content.Context;
 
 public class DownloadTarget implements Target
 {
 	private ContentBuilder cb;
 	private File output;
-	public DownloadTarget(File output)
+	private Context context;
+	public DownloadTarget(Context context,File output)
 	{
+		this.context=context.getApplicationContext();
 		this.output = output;
 		File parent=output.getParentFile();
 		if (!parent.exists())
@@ -51,7 +54,7 @@ public class DownloadTarget implements Target
 			try
 			{
 				Files.copy(new File(Uri.parse(cache).getPath()).toPath(), output.toPath());
-				MediaScannerConnection.scanFile(getContent().getContext(),new String[]{output.getAbsolutePath()},new String[]{"image/*"},null);
+				MediaScannerConnection.scanFile(context,new String[]{output.getAbsolutePath()},new String[]{"image/*"},null);
 			}
 			catch (IOException e)
 			{

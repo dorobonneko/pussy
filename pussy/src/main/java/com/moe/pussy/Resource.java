@@ -16,8 +16,17 @@ public class Resource
 		this.key = key;
 		this.image = bitmap;
 	}
-	public void acquire()
+
+	@Override
+	public String toString()
 	{
+		StringBuilder sb=new StringBuilder();
+		sb.append("count:").append(count);
+		return sb.toString();
+	}
+	
+	public void acquire()
+	{//存在多次调用bug
 		lock.lock();
 		try
 		{

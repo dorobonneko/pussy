@@ -224,7 +224,7 @@ public class Pussy
 				{}
 			}
 	}
-	public void pause(){
+	/*public void pause(){
 		pause.set(true);
 	}
 	public void pause(Target t){
@@ -244,9 +244,10 @@ public class Pussy
 		if(c!=null){
 			c.loader.resume();
 		}
-	}
+	}*/
 	public void cancel(Target target)
 	{
+		Pussy.checkThread(true);
 		ContentBuilder content=target.getContent();
 		if (content != null)
 		{
@@ -259,14 +260,8 @@ public class Pussy
 			Resource res=getActiveResource().get(content.getKey());
 			if (res != null){
 				res.release();
-				
 				}
-			//t.onResourceReady(null,null);
-
-		}else{
-			//new NullPointerException("content is null");
 		}
-		//t.onAttachContent(null);
 	}
 
 	public Context getContext()
@@ -339,8 +334,8 @@ public class Pussy
 		@Override
 		public void onActivityStarted(Activity p1)
 		{
-			if(p1==mContext.get())
-			resume();
+			/*if(p1==mContext.get())
+			resume();*/
 		}
 
 		@Override
@@ -356,8 +351,8 @@ public class Pussy
 		@Override
 		public void onActivityStopped(Activity p1)
 		{
-			if(p1==mContext.get())
-			pause();
+			/*if(p1==mContext.get())
+			pause();*/
 		}
 
 		@Override
@@ -411,13 +406,13 @@ public class Pussy
 			this.l = l;
 		}
 
-		public void pause()
+		/*public void pause()
 		{
 			l.getRequest().getPussy().pause(l.getTarget());
 		}
 		public void resume(){
 			l.getRequest().getPussy().resume(l.getTarget());
-		}
+		}*/
 		public boolean isCancel()
 		{
 			return l.loader.isCancel();

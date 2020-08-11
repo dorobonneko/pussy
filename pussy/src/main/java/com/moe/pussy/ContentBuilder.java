@@ -31,14 +31,14 @@ public class ContentBuilder implements SizeReady,Runnable
 	protected Loader loader;
 	private Listener listener;
 	private long delay;
-	private boolean asBitmap;
+	private boolean asBitmap,cancel;
 	public ContentBuilder(Request r)
 	{
 		this.request = r;
 	}
 	public void download(File output)
 	{
-		DownloadTarget t=new DownloadTarget(output);
+		DownloadTarget t=new DownloadTarget(request.getPussy().getContext(),output);
 		target = t;
 		t.onAttachContent(this);
 		//t.placeHolder(placeHolder);
@@ -56,10 +56,7 @@ public class ContentBuilder implements SizeReady,Runnable
 			loader.loadFromCache();
 
 	}
-	public Context getContext()
-	{
-		return request.getPussy().getContext();
-	}
+	
 	public ContentBuilder delay(long delay)
 	{
 		this.delay = delay;
@@ -76,7 +73,7 @@ public class ContentBuilder implements SizeReady,Runnable
 		asBitmap = true;
 		return this;
 	}
-	protected boolean isAsBitmap()
+	boolean isAsBitmap()
 	{
 		return asBitmap;
 	}
@@ -92,9 +89,8 @@ public class ContentBuilder implements SizeReady,Runnable
 	void cancel()
 	{
 		Pussy.checkThread(true);
-		//loader.pause();
-		if (target == null)return;
-		target = null;
+		loader.cancel();
+		cancel=true;
 		if (request.getKey() != null)
 		{
 			HandleThread ht=request.getPussy().request_handler.get(request.getKey());
@@ -102,7 +98,9 @@ public class ContentBuilder implements SizeReady,Runnable
 				ht.removeCallback(loader);
 		}
 	}
-
+	boolean isCancel(){
+		return cancel;
+	}
 	public ContentBuilder tag(String tag)
 	{
 		this.tag = tag;
@@ -138,7 +136,7 @@ public class ContentBuilder implements SizeReady,Runnable
 			r = new Pussy.Refresh(this);
 		return r;
 	}
-	public final DrawableAnimator getAnim()
+	public DrawableAnimator getAnim()
 	{
 		return anim;
 	}
@@ -172,17 +170,10 @@ public class ContentBuilder implements SizeReady,Runnable
 	boolean refresh(Target t)
 	{
 		Pussy.checkThread(true);
-		if (loader.isCancel())
-		{
-			target = t;
-			t.placeHolder(placeHolder);
-			loader.begin();
-		}
-		else
-		{
-			loader.resume();
-			loader.begin();
-		}
+		getRefresh().cancel();
+		cancel=false;
+		t.placeHolder(placeHolder);
+		loader.begin();
 		return true;
 	}
 	public void into(Target t)
@@ -193,7 +184,9 @@ public class ContentBuilder implements SizeReady,Runnable
 				t.getContent().refresh(t);
 		}else{
 		Pussy.remove(t.getContent());
-		//request.getPussy().cancel(t);
+		ContentBuilder cb=t.getContent();
+		if(cb!=null&&!cb.isCancel())
+		request.getPussy().cancel(t);
 		target = t;
 		t.onAttachContent(this);
 		t.placeHolder(placeHolder);
