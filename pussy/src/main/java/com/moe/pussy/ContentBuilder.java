@@ -65,7 +65,7 @@ public class ContentBuilder implements SizeReady,Runnable
 	@Override
 	public void onSizeReady(int w, int h)
 	{
-		if (target != null)
+		if (!isCancel())
 			loader.onSizeReady(w, h);
 	}
 	public ContentBuilder asBitmap()
@@ -90,16 +90,10 @@ public class ContentBuilder implements SizeReady,Runnable
 	{
 		Pussy.checkThread(true);
 		loader.cancel();
-		cancel=true;
-		if (request.getKey() != null)
-		{
-			HandleThread ht=request.getPussy().request_handler.get(request.getKey());
-			if (ht != null)
-				ht.removeCallback(loader);
-		}
+		loader=null;
 	}
 	boolean isCancel(){
-		return cancel;
+		return loader==null||loader.isCancel();
 	}
 	public ContentBuilder tag(String tag)
 	{
@@ -167,20 +161,22 @@ public class ContentBuilder implements SizeReady,Runnable
 		this.cache = cache;
 		return this;
 	}
-	boolean refresh(Target t)
+	void refresh(Target t)
 	{
 		Pussy.checkThread(true);
-		getRefresh().cancel();
+		if(isCancel()){
 		cancel=false;
+		Pussy.remove(this);
 		t.placeHolder(placeHolder);
+		loader=new Loader(this);
 		loader.begin();
-		return true;
+		}
 	}
 	public void into(Target t)
 	{
 		if (t == null)return;
 		if(equals(t.getContent())){
-			if(t.getContent().getRequest().isCancel())
+			if(t.getContent().isCancel())
 				t.getContent().refresh(t);
 		}else{
 		Pussy.remove(t.getContent());
@@ -201,6 +197,7 @@ public class ContentBuilder implements SizeReady,Runnable
 	@Override
 	public void run()
 	{
+		if(!isCancel())
 		loader.begin();
 	}
 

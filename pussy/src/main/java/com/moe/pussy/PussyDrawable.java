@@ -32,7 +32,6 @@ public class PussyDrawable extends Drawable implements Animatable
 		//this.t=new WeakReference<Target>(t);
 		//refresh=new WeakReference<>(r);
 	}
-	
 	/*public void setAnimator(DrawableAnimator da)
 	{
 		this.da = da;

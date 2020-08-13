@@ -28,14 +28,11 @@ public class HandleThread implements Runnable,RequestHandler.Callback
 	}
 	private void success(){
 		success = true;
-		Pussy.post(new Runnable(){
-			public void run(){
 		for (final Callback call:calls)
 		{
 			call.onResponse(response);
 		}
 		calls.clear();
-		}});
 	}
 	public void cancel()
 	{

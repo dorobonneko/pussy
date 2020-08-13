@@ -19,8 +19,11 @@ public class ActiveResource implements Resource.OnResourceListener
 	public Resource create(String key, Image bitmap)
 	{
 		//if(key==null||bitmap==null||bitmap.isRecycled())throw new RuntimeException("create resource error, key android bitmap must not null and not recycle");
-		Resource res=new Resource(key,bitmap);
+		Resource res=get(key);
+		if(res==null){
+			res=new Resource(key,bitmap);
 		add(res);
+		}
 		return res;
 	}
 
@@ -40,7 +43,14 @@ public class ActiveResource implements Resource.OnResourceListener
 	}
 	public Resource get(String key){
 		if(key==null)return null;
-		return list.get(key);
+		Resource res=list.get(key);
+		return res;
+	}
+	public void recycle(String key){
+		if(key==null)return;
+		Resource res=list.get(key);
+		if(res!=null)
+			res.release();
 	}
 	protected Resource remove(String key){
 		if(key==null)return null;

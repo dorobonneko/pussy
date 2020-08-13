@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Stack;
 import com.moe.pussy.decode.BitmapDecoder;
 import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.Hashtable;
 
 public class Pussy
 {
@@ -42,7 +44,7 @@ public class Pussy
 	protected DiskCache mDiskCache;
 
 	//Map<Target,Loader> loader_queue=new HashMap<>();
-	protected static Map<String,HandleThread> request_handler=new ConcurrentHashMap<>();
+	protected static Map<String,HandleThread> request_handler=new Hashtable<>();
 	protected ThreadPoolExecutor mThreadPoolExecutor;
 	protected Decoder decoder;
 	private Dispatcher mDispatcher;
@@ -249,18 +251,10 @@ public class Pussy
 	{
 		Pussy.checkThread(true);
 		ContentBuilder content=target.getContent();
-		if (content != null)
+		if (content != null&&!content.isCancel())
 		{
 			content.cancel();
-			content.getRequest().cancel(true);
-			HandleThread ht=request_handler.remove(content.getRequest().getKey());
-				if (ht != null)
-					ht.cancel();
 			target.onCancel();
-			Resource res=getActiveResource().get(content.getKey());
-			if (res != null){
-				res.release();
-				}
 		}
 	}
 
@@ -415,11 +409,11 @@ public class Pussy
 		}*/
 		public boolean isCancel()
 		{
-			return l.loader.isCancel();
+			return l.isCancel();
 		}
-		public boolean refresh(Target t)
+		public void refresh(Target t)
 		{
-			return l.refresh(t);
+			l.refresh(t);
 		}
 		public void cancel(){
 			l.getRequest().getPussy().cancel(l.getTarget());

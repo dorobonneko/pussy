@@ -8,7 +8,7 @@ public class Resource
 {
 	String key;
 	Image image;
-	int count;
+	int count=0;
 	private Lock lock=new ReentrantLock();
 	private OnResourceListener listener;
 	protected Resource(String key, Image bitmap)

@@ -23,9 +23,10 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 	private String resource;
 	private int w,h;
 	//private AtomicBoolean pause=new AtomicBoolean();
-	private Object pauseLock=new Object();
+	private boolean cancel;
 	private String key,requestKey;
 	private Thread transThread;
+	private Resource image;
 	public Loader(ContentBuilder content)
 	{
 		this.content = content;
@@ -60,7 +61,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 					}
 				}});
 	}
-
+	
 	/*public void pause()
 	 {
 	 pause.set(true);
@@ -91,7 +92,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 	 }*/
 	boolean isCancel()
 	{
-		return content.isCancel();
+		return cancel;
 	}
 	Pussy getPussy()
 	{
@@ -107,6 +108,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 	}
 	public void begin()
 	{
+		if(isCancel())return;
 		Resource res=getPussy().getActiveResource().get(key);
 		if (res != null)
 		{
@@ -118,18 +120,22 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 			Image bitmap=getPussy().getMemoryCache().remove(key);
 			if (bitmap != null)
 			{
-				res = getPussy().getActiveResource().create(key, bitmap);
+			res=getPussy().getActiveResource().create(key, bitmap);
 				success(res, null);
 			}
 			else
 			{
+				Pussy.execute(new Runnable(){
+					public void run(){
 				loadFromCache();
+				}});
 			}
 
 		}
 	}
 	void loadFromCache()
 	{
+		Pussy.checkThread(false);
 		try
 		{
 			DiskCache dc=getPussy().getDiskCache();
@@ -139,8 +145,7 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 			{
 				//解码
 				Image image=getPussy().decoder.decode(getPussy().getBitmapPool(), Uri.fromFile(cache_file), content.isAsBitmap(), 0, 0);
-				Resource res=getPussy().getActiveResource().create(key, image);
-				success(res, null);
+				success(getPussy().getActiveResource().create(key, image), null);
 				//getTarget().onResourceReady(cache_file);
 				//getPussy().fileThreadPool.execute(new BitmapLoader(getPussy().getBitmapPool(),getPussy().decoder, content.get().getKey(), cache_file, this));
 
@@ -181,27 +186,39 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 	}
 
 	public void cancel(){
+		cancel=true;
 		if(transThread!=null)
 			transThread.interrupt();
+			HandleThread ht=getPussy().request_handler.get(requestKey);
+			if(ht!=null)
+				ht.removeCallback(this);
+			if(image!=null)
+				image.release();
+			//content=null;
+		
 	}
 	@Override
 	public void run()
 	{
-		getPussy().waitForPaused();
-		if(!Thread.currentThread().isInterrupted())
-		synchronized (getTarget())
-		{
+		Pussy.checkThread(false);
+		
+		if(!isCancel()){
+			Pussy pussy=getPussy();
+			ContentBuilder content=this.content;
+			if(isCancel())return;
+			pussy.waitForPaused();
+		
 			Image source=null;
-			File cache=getPussy().getDiskCache().getCache(requestKey);
+			File cache=pussy.getDiskCache().getCache(requestKey);
 			if (cache != null)
-				source = getPussy().decoder.decode(getPussy().getBitmapPool(), Uri.fromFile(cache), content.isAsBitmap(), w, h);
+				source = pussy.decoder.decode(pussy.getBitmapPool(), Uri.fromFile(cache), content.isAsBitmap(), w, h);
 			else if (resource != null)
-				source = getPussy().decoder.decode(getPussy().getBitmapPool(), Uri.parse(resource), content.isAsBitmap(), w, h);
+				source = pussy.decoder.decode(pussy.getBitmapPool(), Uri.parse(resource), content.isAsBitmap(), w, h);
 			if (source == null || source.getBitmap() == null)
 			{
 				if (cache != null)
 					cache.delete();
-				getPussy().request_handler.remove(requestKey);
+				pussy.request_handler.remove(requestKey);
 				success(null, new NullPointerException("possible bitmap decoder error"));
 				return;
 			}
@@ -210,11 +227,11 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 				Bitmap sourceBitmap=source.getBitmap();
 				for (Transformer transformer:content.getTransformer())
 				{
-					sourceBitmap = transformer.onTransformer(getPussy().mBitmapPool, sourceBitmap, w, h);
+					sourceBitmap = transformer.onTransformer(pussy.mBitmapPool, sourceBitmap, w, h);
 				}
 				source = Image.parse(sourceBitmap);
 			}
-			success(getPussy().getActiveResource().create(key, source), null);
+			success(pussy.getActiveResource().create(key, source), null);
 			try
 			{
 				if (!source.isGif() && content.getCache() == DiskCache.Cache.MASK)
@@ -225,12 +242,12 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 			source = null;
 			resource = null;
 		}
-
 	}
 
 	@Override
 	public void onResponse(RequestHandler.Response response)
 	{
+		Pussy.checkThread(false);
 		if (response == null)
 		{
 			getPussy().request_handler.remove(requestKey);
@@ -268,22 +285,23 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 
 	private void success(final Resource res, final Throwable e)
 	{
+		if (isCancel())
+		{
+			res.acquire();
+			res.release();
+			return;
+		}
+		
 		Pussy.post(new Runnable(){
 				public void run()
 				{
-
+					if(isCancel())return;
 					if (getRequest().getListener() != null)
 					{
 						getRequest().getListener().onEnd(getRequest(), e);
 					}
 				}});
-		//Pussy.checkThread(false);
-		if (isCancel()||Thread.currentThread().isInterrupted())
-		{
-			if (res != null)
-				res.release();
-			return;
-		}
+		
 		if (res == null)
 		{
 			//throw new NullPointerException(e.getMessage());
@@ -300,18 +318,23 @@ public class Loader implements Runnable,HandleThread.Callback,SizeReady
 			Pussy.post(new Runnable(){
 					public void run()
 					{
+						if(isCancel()){
+							res.acquire();
+							res.release();
+							return;
+							}
 						Target t=getTarget();
 						if (t != null)
 						{
 							getPussy().getDiskCache().invalidate(key);
 							getPussy().getDiskCache().invalidate(requestKey);
-							try{
-								res.acquire();
-							t.onSuccess(new PussyDrawable(res.image, content.getAnim()));
-							}catch(IllegalStateException e){
-								//任务 cancel
-								}
+							Image img=res.image;
+							res.acquire();
+							image=res;
+							t.onSuccess(new PussyDrawable(img, content.getAnim()));
+							
 						}
+						
 					}
 				});}
 	}
