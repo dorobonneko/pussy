@@ -30,6 +30,7 @@ import com.moe.pussy.decode.BitmapDecoder;
 import java.util.stream.Stream;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.concurrent.SynchronousQueue;
 
 public class Pussy
 {
@@ -81,7 +82,8 @@ public class Pussy
 		};
 		//fileThreadPool = new ThreadPoolExecutor(64, 128, 1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), tf);//先进后出
 		//netThreadPool = new ThreadPoolExecutor(128, 512, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), tf);//先进后出
-		mThreadPoolExecutor = new ThreadPoolExecutor(16, 32, 3, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(){
+		mThreadPoolExecutor = new ThreadPoolExecutor(16, 32, 3, TimeUnit.SECONDS,new SynchronousQueue<Runnable>());
+        /*new LinkedBlockingDeque<Runnable>(){
 			public Runnable take()
 				{
 					try
@@ -95,7 +97,7 @@ public class Pussy
 			public Runnable poll(){
 						return pollLast();
 					}
-				}, tf);//先进后出
+				}, tf);//先进后出*/
 
 	}
 	private void init(Context context)

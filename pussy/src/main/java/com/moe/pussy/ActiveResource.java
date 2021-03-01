@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import android.graphics.Bitmap;
 import java.util.Hashtable;
+import java.util.function.Consumer;
 
 public class ActiveResource implements Resource.OnResourceListener
 {
@@ -29,13 +30,15 @@ public class ActiveResource implements Resource.OnResourceListener
 
 	public void clear()
 	{
-		Iterator iterator=list.entrySet().iterator();
-		while(iterator.hasNext()){
-			Map.Entry<String,Resource> item=(Map.Entry<String, Resource>) iterator.next();
-			iterator.remove();
-			pussy.getMemoryCache().put(item.getKey(),item.getValue().image);
+        list.values().stream().forEach(new Consumer<Resource>(){
 
-		}
+                @Override
+                public void accept(Resource item) {
+                    pussy.getMemoryCache().put(item.key,item.image);
+                    
+                }
+            });
+		list.clear();
 	}
 	protected void add(Resource res){
 		res.setOnResourceListener(this);

@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.Stack;
 import java.util.Vector;
 import android.graphics.Color;
+import java.util.Collection;
+import java.util.function.Predicate;
 
 public class BitmapPool extends LinkedHashMap<Integer,Stack<Bitmap>>
 {
@@ -85,29 +87,35 @@ public class BitmapPool extends LinkedHashMap<Integer,Stack<Bitmap>>
 			lock.unlock();
 		}
 	}
-	public void trimToSize(long size)
+	public void trimToSize(final long size)
 	{
 		if (currentSize > size)
 		{
+            
 			Iterator<Map.Entry<Integer,Stack<Bitmap>>> iterator_map=entrySet().iterator();
 			while (iterator_map.hasNext())
 			{
 				Map.Entry<Integer,Stack<Bitmap>> list=iterator_map.next();
-				Iterator<Bitmap> iterator=list.getValue().iterator();
-				while (iterator.hasNext())
-				{
-					Bitmap bitmap=iterator.next();
-					iterator.remove();
-					currentSize -= getBitmapByteSize(bitmap);
-					synchronized (bitmap)
-					{
-						if (!bitmap.isRecycled())
-							bitmap.recycle();
-					}
-					if (currentSize < size)return;
-				}
-				if (list.getValue().isEmpty())
-					iterator_map.remove();
+				list.getValue().removeIf(new Predicate<Bitmap>(){
+
+                        @Override
+                        public boolean test(Bitmap bitmap) {
+                            if (currentSize < size)return false;
+                            
+                            currentSize -= getBitmapByteSize(bitmap);
+                            synchronized (bitmap)
+                            {
+                                if (!bitmap.isRecycled())
+                                    bitmap.recycle();
+                            }
+                            return true;
+                        }
+                    });
+                
+				//if (list.getValue().isEmpty())
+					//iterator_map.remove();
+                if (currentSize < size)break;
+                
 			}
 		}
 	}
